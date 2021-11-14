@@ -11,8 +11,12 @@ var config = new ConfigurationBuilder()
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var redisWriteHosts = config.GetSection("Redis:WriteHosts").Get<string[]>();
+var redisReadHosts = config.GetSection("Redis:ReadHosts").Get<string[]>();
 builder.Services.AddSingleton<IRedisClientsManagerAsync>(
-    cm => new RedisManagerPool(config.GetConnectionString("Redis")));
+    cm => new PooledRedisClientManager(redisWriteHosts, redisReadHosts) {
+        ConnectTimeout = 100
+    });
 builder.Services.AddSingleton<IStockItemRepositoryAsync, StockItemRepositoryAsync>();
     
 builder.Services.AddControllers();
