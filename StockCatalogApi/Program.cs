@@ -1,7 +1,20 @@
+using ServiceStack.Redis;
+using StockCatalogApi.Repositories.Interfaces;
+using StockCatalogApi.Repositories;
+
+var config = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false)
+        .AddCommandLine(args)
+        .Build();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddSingleton<IRedisClientsManagerAsync>(
+    cm => new RedisManagerPool(config.GetConnectionString("Redis")));
+builder.Services.AddSingleton<IStockItemRepositoryAsync, StockItemRepositoryAsync>();
+    
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
